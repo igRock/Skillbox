@@ -6,8 +6,7 @@ public class DBConnection
 
     private static String dbName = "learn";
     private static String dbUser = "root";
-    private static String dbPass = "";
-    private static StringBuilder insertQuery = new StringBuilder();
+    private static String dbPass = "Uhbghjcnuhb12";
 
     public static Connection getConnection()
     {
@@ -15,8 +14,8 @@ public class DBConnection
         {
             try {
                 connection = DriverManager.getConnection(
-                    "jdbc:mysql://localhost:3306/" + dbName +
-                    "?user=" + dbUser + "&password=" + dbPass);
+                    "jdbc:mysql://localhost:3306/" + dbName + "?autoReconnect=true&useSSL=false&useUnicode=true" +
+                            "&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC", dbUser, dbPass);
                 connection.createStatement().execute("DROP TABLE IF EXISTS voter_count");
                 connection.createStatement().execute("CREATE TABLE voter_count(" +
                         "id INT NOT NULL AUTO_INCREMENT, " +
@@ -32,20 +31,6 @@ public class DBConnection
         return connection;
     }
 
-    public static void executeMultiInsert() throws SQLException{
-        String sql = "INSERT INTO voter_count(name, birthDate, `count`) " +
-                "VALUES" + insertQuery.toString() +
-                "ON DUPLICATE KEY UPDATE `count` = `count` + 1";
-        DBConnection.getConnection().createStatement().execute(sql);
-
-    }
-    public static void countVoter(String name, String birthDay) throws SQLException
-    {
-        birthDay = birthDay.replace('.', '-');
-        insertQuery.append((insertQuery.length() == 0 ? "" : ",") +
-                "(" + name + "', '" + birthDay + "', 1)");
-    }
-
     public static void printVoterCounts() throws SQLException
     {
         String sql = "SELECT name, birthDate, `count` FROM voter_count WHERE `count` > 1";
@@ -55,5 +40,6 @@ public class DBConnection
             System.out.println("\t" + rs.getString("name") + " (" +
                     rs.getString("birthDate") + ") - " + rs.getInt("count"));
         }
+        rs.close();
     }
 }
